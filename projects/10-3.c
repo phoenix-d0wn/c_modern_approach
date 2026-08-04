@@ -37,7 +37,7 @@ int main(void)
 //  and card_exists[][]
 void read_hand(void)
 {
-    int card, i, rank, suit;
+    int card, i, j, rank, suit;
     char rank_ch, suit_ch, ch;
     bool bad_card, dupe_card;
 
@@ -59,6 +59,12 @@ void read_hand(void)
         for (i=0; i<RANK_SUIT; i++)
             hand[card][i] = 0;
     }
+
+    //for debug
+    // printf("Hand:\n");
+    // for (card=0; card<NUM_CARDS; card++) {
+    //     printf("[%d]: %d,%d\n", card, hand[card][0], hand[card][1]);
+    // }
 
     int cards_read = 0;
     while (cards_read < NUM_CARDS) {
@@ -113,17 +119,28 @@ void read_hand(void)
         else if (dupe_card)
             printf("Card duplicate. Ignored\n");
         else {
-            hand[cards_read][0]     = rank;
-            hand[cards_read++][1]   = suit;
-            // cards_read++;
+
+            for (i = 0; i < cards_read; i++) {
+                // printf("i = %d\n", i);
+                if (rank <= hand[i][0]) 
+                    break;
+            }
+            for (j = cards_read; j > i; j--) {
+                hand[j][0] = hand[j-1][0];
+                hand[j][1] = hand[j-1][1];
+            }
+
+            hand[i][0]   = rank;
+            hand[i][1]   = suit;
+            cards_read++;
         }
     }
 
     //for debug
-    printf("Hand:\n");
-    for (card=0; card<NUM_CARDS; card++) {
-        printf("[%d]: %d%d\n", card, hand[card][0], hand[card][1]);
-    }
+    // printf("Hand:\n");
+    // for (card=0; card<NUM_CARDS; card++) {
+    //     printf("[%d]: %d,%d\n", card, hand[card][0], hand[card][1]);
+    // }
 
 }
 
@@ -134,8 +151,8 @@ void analyze_hand(void)
     bool pair_switch;
     int rank, suit;
 
-    straight = flush = true;
-    four = three = false;
+    flush = true;
+    four = three = straight = false;
     pairs = 0;  //can be 0-2
 
     //check for flush
@@ -147,12 +164,9 @@ void analyze_hand(void)
     }
 
     //check for straight
-    rank = hand[0][0];
-    for (card=1; card<NUM_CARDS; card++) {
+    if ((hand[4][0] - hand[0][0]) == 4)
+        straight = true;
 
-        if (hand[card][0] != rank)
-            straight = false;  break;
-    }
 
     //check for pairs, threes, and fours
     max_recurr = 1;
@@ -176,11 +190,11 @@ void analyze_hand(void)
     else if (max_recurr == 2)   pairs   = true;     //TODO update checking for pairs
 
     //test analyze_hand
-    printf("Straight?:\t%b\n", straight);
-    printf("Flush?:\t\t%b\n", flush);
-    printf("Four?:\t\t%b\n", four);
-    printf("Three?:\t\t%b\n", three);
-    printf("Pairs:\t\t%d\n", pairs);
+    // printf("Straight?:\t%b\n", straight);
+    // printf("Flush?:\t\t%b\n", flush);
+    // printf("Four?:\t\t%b\n", four);
+    // printf("Three?:\t\t%b\n", three);
+    // printf("Pairs:\t\t%d\n", pairs);
 }
 
 //print_result: print the kind of hand user has
